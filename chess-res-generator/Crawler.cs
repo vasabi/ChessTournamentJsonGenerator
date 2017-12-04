@@ -487,8 +487,10 @@ namespace chess_res_generator
                                             foes1Points.Add(re2.points);
                                         if (re1.points != null)
                                             foes2Points.Add(re1.points);
-                                        var trigger1 = false;
-                                        var trigger2 = false;
+                                        if (firstPlayersResult[i].Equals("1"))
+                                            winsCount1++;
+                                        if (secondPlayersResult[i].Equals("1"))
+                                            winsCount2++;
                                         foreach (var oneOfPreviousRounds in roundsList)
                                         {
                                             for (var cnt = 0; cnt < roundResults.Count; cnt++)
@@ -499,14 +501,6 @@ namespace chess_res_generator
                                                     {
                                                         if (oneOfPreviousRounds[4][cnt].Equals("1"))
                                                             winsCount1++;
-                                                        if (trigger1 == false)
-                                                        {
-                                                            if (roundResultList[4][cnt].Equals("1") && roundResultList[10][cnt].Equals(re2.playerNum.ToString()))
-                                                            {
-                                                                winsCount1++;
-                                                                trigger1 = true;
-                                                            }
-                                                        }
                                                         foes1.Add(oneOfPreviousRounds[10][cnt]);
                                                     }
                                                 }
@@ -517,14 +511,6 @@ namespace chess_res_generator
                                                     {
                                                         if (oneOfPreviousRounds[6][cnt].Equals("1"))
                                                             winsCount1++;
-                                                        if (trigger1 == false)
-                                                        {
-                                                            if (roundResultList[6][cnt].Equals("1") && roundResultList[0][cnt].Equals(re2.playerNum.ToString()))
-                                                            {
-                                                                winsCount1++;
-                                                                trigger1 = true;
-                                                            }
-                                                        }
                                                         foes1.Add(oneOfPreviousRounds[0][cnt]);
                                                     }
                                                 }
@@ -535,14 +521,6 @@ namespace chess_res_generator
                                                     {
                                                         if (oneOfPreviousRounds[4][cnt].Equals("1"))
                                                             winsCount2++;
-                                                        if (trigger2 == false)
-                                                        {
-                                                            if (roundResultList[4][cnt].Equals("1") && roundResultList[10][cnt].Equals(re1.playerNum.ToString()))
-                                                            {
-                                                                winsCount2++;
-                                                                trigger2 = true;
-                                                            }
-                                                        }
                                                         foes2.Add(oneOfPreviousRounds[10][cnt]);
                                                     }
                                                 }
@@ -553,14 +531,6 @@ namespace chess_res_generator
                                                     {
                                                         if (oneOfPreviousRounds[6][cnt].Equals("1"))
                                                             winsCount2++;
-                                                        if (trigger2 == false)
-                                                        {
-                                                            if (roundResultList[6][cnt].Equals("1") && roundResultList[0][cnt].Equals(re1.playerNum.ToString()))
-                                                            {
-                                                                winsCount2++;
-                                                                trigger2 = true;
-                                                            }
-                                                        }
                                                         foes2.Add(oneOfPreviousRounds[0][cnt]);
                                                     }
                                                 }

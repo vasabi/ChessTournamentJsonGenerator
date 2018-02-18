@@ -38,6 +38,8 @@ namespace chess_res_generator
         public int? nationalRating { get; set; }
         public int? age { get; set; }
         public string sex { get; set; }
+        public string region { get; set; }
+        public string club { get; set; }
     }
 
     class Round
@@ -56,21 +58,21 @@ namespace chess_res_generator
 
     class White
     {
-        public int? playerNum { get; set; }
+        public string playerId { get; set; }
         public string result { get; set; }
         public double? resultPoints { get; set; }
     }
 
     class Black
     {
-        public int? playerNum { get; set; }
+        public string playerId { get; set; }
         public string result { get; set; }
         public double? resultPoints { get; set; }
     }
 
     class Result
     {
-        public int? playerNum { get; set; }
+        public string playerId { get; set; }
         public double? points { get; set; }
         public double?[] tieBreaks { get; set; }
     }

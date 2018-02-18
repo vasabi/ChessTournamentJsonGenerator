@@ -34,8 +34,37 @@ namespace chess_res_generator
 
             StreamWriter outputBigFile = new StreamWriter(Path.Combine(resultFolder, "tournamentsMongo.json"));
 
-            Crawler cr = new Crawler();
-            cr.GetAllTournaments(outputBigFile, tournamentsFolder);
+            Console.WriteLine("1 - Вытащить турниры с ресурса, 2 - Собрать большой джейсон из маленьких");
+            var cs = Console.ReadLine();
+
+            switch (cs)
+            {
+                case "1":
+                    Crawler cr = new Crawler();
+                    cr.GetAllTournaments(outputBigFile, tournamentsFolder);
+                    break;
+                case "2":
+                    var j = 1;
+                    var trns = Directory.GetFiles(tournamentsFolder, "*.json", SearchOption.AllDirectories);
+                    outputBigFile.WriteLine("[");
+                    foreach (var file in trns)
+                    {
+                        var i = 1;
+                        var content = File.ReadAllLines(file);
+                        foreach (var line in content)
+                        {
+                            if (i == content.Length && j!=trns.Length)
+                                outputBigFile.WriteLine("  " + line + ",");
+                            else
+                                outputBigFile.WriteLine("  " + line);
+                            i++;
+                        }
+                        j++;
+                    }
+                    outputBigFile.WriteLine("]");
+                    outputBigFile.Close();
+                    break;
+            }
 
             Console.WriteLine("Thats All Folks");
             Console.ReadKey();

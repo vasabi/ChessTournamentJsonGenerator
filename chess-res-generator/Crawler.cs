@@ -15,11 +15,13 @@ using System.IO;
 using System.Collections;
 using System.Globalization;
 using Newtonsoft.Json;
+using MongoDB.Bson;
 
 namespace chess_res_generator
 {
     class Crawler
     {
+        private static bool keepRunning = true;
         public void GetAllTournaments(StreamWriter file, string tournamentsFolder)
         {
             string urlPageWithListOfYears = "TurnierSuche.aspx?lan=11&jahr=99999";
@@ -29,7 +31,7 @@ namespace chess_res_generator
                 var htmlPageWithListOfYears = GetPage(urlPageWithListOfYears).Result;
 
                 CQ listOfYearsTd = htmlPageWithListOfYears
-                    ["#_ctl0_F7 > div:nth-child(n) > table > tbody > tr:nth-child(2) > td.CR > a"];
+                    ["#_ctl0_F7 > div:nth-child(n) > table > tbody > tr:nth-child(n) > td.CR > a"];
 
                 int trnCount = int.Parse(htmlPageWithListOfYears
                     ["#_ctl0_F7 > div:nth-child(n) > table > tbody > tr.CRg1b:last-child > td.CR:contains(\"Все турниры\") ~ td.CRr:last-child"][0]
@@ -58,6 +60,17 @@ namespace chess_res_generator
                 tournamentsList.Add(currentTournamentRoundsList);
 
                 List<Tournament> trns = new List<Tournament>();
+
+                Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
+                {
+                    e.Cancel = true;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("{0}{0}Обнаружен сигнал прерывания выполнения программы. Завершается выгрузка турниров...{0}{0}", Environment.NewLine);
+                    Console.ResetColor();
+                    Console.Title = "Please stand by";
+
+                    Crawler.keepRunning = false;
+                };
 
                 foreach (IDomObject years in listOfYearsTd)
                 {
@@ -99,10 +112,10 @@ namespace chess_res_generator
                         }
 
                     }
-                    foreach (IDomObject item in tournamentRoundCountTd)
-                    {
-                        tournamentRoundsCountList.Add(WebUtility.HtmlDecode(item.InnerText.Trim()));
-                    }
+                    //foreach (IDomObject item in tournamentRoundCountTd)
+                    //{
+                    //    tournamentRoundsCountList.Add(WebUtility.HtmlDecode(item.InnerText.Trim()));
+                    //}
                     foreach (IDomObject item in tournamentPlayerCountTd)
                     {
                         tournamentPlayersCountList.Add(WebUtility.HtmlDecode(item.InnerText.Trim()));
@@ -119,11 +132,14 @@ namespace chess_res_generator
                         currentTournamentRoundsList.Add(roundsList);
 
                         tournamentUrlsList.Add(item.GetAttribute("href"));
-                        tournamentIdsList.Add(Math.Abs(tournamentUrlsList[ti].GetHashCode()).ToString("0000000000") + "-chessres");
+                        //tournamentIdsList.Add(Math.Abs(tournamentUrlsList[ti].GetHashCode()).ToString("0000000000") + "-chessres");
+                        tournamentIdsList.Add(ObjectId.GenerateNewId().ToString());
                         tournamentPrivateIdsList.Add("_" + tournamentIdsList[ti]);
                         tournamentNamesList.Add(WebUtility.HtmlDecode(item.InnerText.Trim()));
+                        var titleTrnName = tournamentNamesList[ti];
                         Console.WriteLine(tournamentUrlsList[ti]);
-                        Console.WriteLine(tournamentNamesList[ti]);
+                        Console.WriteLine(titleTrnName);
+                        Console.Title = titleTrnName;
 
                         #region GetCutTournamentPage
                         CQ htmlPageTournamentCut = GetPage(tournamentUrlsList[ti]).Result;
@@ -178,6 +194,8 @@ namespace chess_res_generator
                         List<string> playerSexList = new List<string>();
                         List<string> playerFIDEIdsList = new List<string>();
                         List<string> playerFinalPointsList = new List<string>();
+                        List<string> playerRegionList = new List<string>();
+                        List<string> playerClubList = new List<string>();
 
                         playerInfoList.Add(playerIdsList);
                         playerInfoList.Add(playerUrlsList);
@@ -189,6 +207,8 @@ namespace chess_res_generator
                         playerInfoList.Add(playerSexList);
                         playerInfoList.Add(playerFIDEIdsList);
                         playerInfoList.Add(playerFinalPointsList);
+                        playerInfoList.Add(playerRegionList);
+                        playerInfoList.Add(playerClubList);
 
                         Player[] plrs = new Player[playerUrlTd.Count()];
 
@@ -208,6 +228,8 @@ namespace chess_res_generator
                             string playerAge = null;
                             string playerFIDEId = null;
                             string playerFinalPoints = null;
+                            string playerRegion = null;
+                            string playerClub = null;
 
                             try
                             {
@@ -264,16 +286,36 @@ namespace chess_res_generator
                             catch { }
                             playerFinalPointsList.Add(playerFinalPoints);
 
-                            playerNationalIdsList.Add(Math.Abs((playerFIDEId + playerAge + playerName).GetHashCode()).ToString("0000000000"));
-                            playerIdsList.Add(playerNationalIdsList[pi] + "-chessres");
+                            try
+                            {
+                                playerRegion = WebUtility.HtmlDecode(htmlPlayerInfo
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Федерация\") + td"][0].InnerText).Trim();
+                            }
+                            catch { }
+                            playerRegionList.Add(playerRegion);
 
-                            Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}", playerName, playerNumber, playerNationalRating, playerAge, playerFIDEId, playerFinalPoints, Environment.NewLine);
+                            try
+                            {
+                                playerClub = WebUtility.HtmlDecode(htmlPlayerInfo
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Клуб/Город\") + td"][0].InnerText).Trim();
+                            }
+                            catch { }
+                            playerClubList.Add(playerClub);
+
+                            //playerNationalIdsList.Add(Math.Abs((playerFIDEId + playerAge + playerName).GetHashCode()).ToString("0000000000"));
+                            playerIdsList.Add(ObjectId.GenerateNewId().ToString());
+                            //playerIdsList.Add(playerNationalIdsList[pi] + "-chessres");
+
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("{8}{8}{0}{8}{1}{8}{2}{8}{3}{8}{4}{8}{5}{8}{6}{8}{7}{8}{8}{8}", playerName, playerNumber, playerNationalRating, playerAge, playerIdsList[pi],
+                                playerFinalPoints, playerRegion, playerClub, Environment.NewLine);
+                            Console.ResetColor();
 
                             Player p = new Player();
 
-                            //try { p.playerId = playerIdsList[pi]; }
-                            //catch { p.playerId = null; }
-                            p.playerId = null;
+                            try { p.playerId = playerIdsList[pi]; }
+                            catch { p.playerId = null; }
+                            //p.playerId = null;
                             try { p.number = pi + 1; }
                             catch { p.number = null; }
                             try { p.name = playerNamesList[pi]; }
@@ -282,11 +324,15 @@ namespace chess_res_generator
                             //catch { p.nationalId = null; }
                             p.nationalId = null;
                             try { p.nationalRating = int.Parse(playerNationalRatingsList[pi], NumberStyles.Integer); }
-                            catch { p.nationalId = null; }
+                            catch { p.nationalRating = 0; }
                             try { p.age = int.Parse(playerAgesList[pi], NumberStyles.Integer); }
                             catch { p.age = null; }
                             try { p.sex = playerSexList[pi]; }
                             catch { p.sex = null; }
+                            try { p.region = playerRegionList[pi]; }
+                            catch { p.region = null; }
+                            try { p.club = playerClubList[pi]; }
+                            catch { p.club = null; }
 
                             plrs[pi] = p;
                             pi++;
@@ -302,10 +348,25 @@ namespace chess_res_generator
                         if (roundResultUrlTd.Count() == 0)
                             isRoundsParsed = false;
 
+                        bool isRoundCountCalculated = false;
+                        var roundCountStringPattern = @"(.*?)(\/)(.*)";
+
                         foreach (IDomObject round in roundResultUrlTd)
                         {
+                            if (!isRoundCountCalculated && Regex.IsMatch(WebUtility.HtmlDecode(round.InnerText), roundCountStringPattern))
+                            {
+                                tournamentRoundsCountList.Add(Regex.Replace(WebUtility.HtmlDecode(round.InnerText), roundCountStringPattern, "$3").Trim());
+                                isRoundCountCalculated = true;
+                            }
+                            if (!isRoundCountCalculated && roundResultUrlTd.All(e => !Regex.IsMatch(WebUtility.HtmlDecode(e.InnerText), roundCountStringPattern)))
+                            {
+                                tournamentRoundsCountList.Add("0");
+                                isRoundCountCalculated = true;
+                            }
+
                             var roundResultUrl = round.GetAttribute("href");
                             Console.WriteLine("{0}{1}", roundResultUrl, Environment.NewLine);
+                            Console.Title = titleTrnName + " current round = " + ri;
                             CQ htmlRoundResult = GetPage(roundResultUrl).Result;
                             List<string> firstPlayersNumbers = new List<string>();
                             List<string> firstPlayersNames = new List<string>();
@@ -449,10 +510,10 @@ namespace chess_res_generator
                                     Result re2 = new Result();
                                     Result re = new Result();
 
-                                    try { w.playerNum = int.Parse(firstPlayersNumbers[i], NumberStyles.Integer); }
-                                    catch { w.playerNum = null; };
-                                    try { b.playerNum = int.Parse(secondPlayersNumbers[i], NumberStyles.Integer); }
-                                    catch { b.playerNum = null; };
+                                    try { w.playerId = playerIdsList[int.Parse(firstPlayersNumbers[i], NumberStyles.Integer) - 1]; }
+                                    catch { w.playerId = null; };
+                                    try { b.playerId = playerIdsList[int.Parse(secondPlayersNumbers[i], NumberStyles.Integer) - 1]; }
+                                    catch { b.playerId = null; };
                                     try { w.result = firstPlayersResult[i]; }
                                     catch { w.result = null; }
                                     try { b.result = secondPlayersResult[i]; }
@@ -462,11 +523,11 @@ namespace chess_res_generator
                                     try { b.resultPoints = Double.Parse(secondPlayersPoints[i], CultureInfo.InvariantCulture); }
                                     catch { b.resultPoints = null; }
 
-                                    re1.playerNum = w.playerNum;
+                                    re1.playerId = w.playerId;
                                     try { re1.points = w.resultPoints + Double.Parse(firstPlayersPointsPre[i], new NumberFormatInfo() { NumberDecimalSeparator = "," }); }
                                     catch { re1.points = null; }
 
-                                    re2.playerNum = b.playerNum;
+                                    re2.playerId = b.playerId;
                                     try { re2.points = b.resultPoints + Double.Parse(secondPlayersPointsPre[i], new NumberFormatInfo() { NumberDecimalSeparator = "," }); }
                                     catch { re2.points = null; }
 
@@ -497,7 +558,7 @@ namespace chess_res_generator
                                             {
                                                 try
                                                 {
-                                                    if (oneOfPreviousRounds[0][cnt].Equals(re1.playerNum.ToString()))
+                                                    if (oneOfPreviousRounds[0][cnt].Equals(re1.playerId))
                                                     {
                                                         if (oneOfPreviousRounds[4][cnt].Equals("1"))
                                                             winsCount1++;
@@ -507,7 +568,7 @@ namespace chess_res_generator
                                                 catch { }
                                                 try
                                                 {
-                                                    if (oneOfPreviousRounds[10][cnt].Equals(re1.playerNum.ToString()))
+                                                    if (oneOfPreviousRounds[10][cnt].Equals(re1.playerId))
                                                     {
                                                         if (oneOfPreviousRounds[6][cnt].Equals("1"))
                                                             winsCount1++;
@@ -517,7 +578,7 @@ namespace chess_res_generator
                                                 catch { }
                                                 try
                                                 {
-                                                    if (oneOfPreviousRounds[0][cnt].Equals(re2.playerNum.ToString()))
+                                                    if (oneOfPreviousRounds[0][cnt].Equals(re2.playerId))
                                                     {
                                                         if (oneOfPreviousRounds[4][cnt].Equals("1"))
                                                             winsCount2++;
@@ -527,7 +588,7 @@ namespace chess_res_generator
                                                 catch { }
                                                 try
                                                 {
-                                                    if (oneOfPreviousRounds[10][cnt].Equals(re2.playerNum.ToString()))
+                                                    if (oneOfPreviousRounds[10][cnt].Equals(re2.playerId))
                                                     {
                                                         if (oneOfPreviousRounds[6][cnt].Equals("1"))
                                                             winsCount2++;
@@ -627,7 +688,7 @@ namespace chess_res_generator
 
                                     re1.tieBreaks = new double?[] { buchholz1, buchholzCut11, winsCount1 };
                                     re2.tieBreaks = new double?[] { buchholz2, buchholzCut12, winsCount2 };
-                                    for (var k=0; k<3;k++)
+                                    for (var k = 0; k < 3; k++)
                                     {
                                         if (re1.tieBreaks[k] == null)
                                             re1.tieBreaks[k] = 0.0;
@@ -644,15 +705,15 @@ namespace chess_res_generator
 
                                     brd.white = w;
                                     brd.black = b;
-                                    if (w.playerNum == null)
+                                    if (w.playerId == null)
                                         brd.white = null;
-                                    if (b.playerNum == null)
+                                    if (b.playerId == null)
                                         brd.black = null;
 
                                     brds[i] = brd;
-                                    if (re1.playerNum != null)
+                                    if (re1.playerId != null)
                                         rslts.Add(re1);
-                                    if (re2.playerNum != null)
+                                    if (re2.playerId != null)
                                         rslts.Add(re2);
                                 }
 
@@ -686,7 +747,7 @@ namespace chess_res_generator
                             catch { trn.name = null; }
                             try { trn.startDate = tournamentDatesList[ti]; }
                             catch { trn.startDate = null; }
-                            try { trn.roundsCount = int.Parse(tournamentRoundsCountList[ti], NumberStyles.Integer); }
+                            try { trn.roundsCount = int.Parse(tournamentRoundsCountList.Last(), NumberStyles.Integer); }
                             catch { trn.roundsCount = null; }
                             trn.tieBreaks = new string[] { "buchholz", "buchholzCut1", "winsCount" };
 
@@ -700,11 +761,15 @@ namespace chess_res_generator
                         }
 
                         ti++;
+                        if (Crawler.keepRunning == false) break;
                     }
+                    if (Crawler.keepRunning == false) break;
                 }
 
                 file.Write(JsonConvert.SerializeObject(trns, Newtonsoft.Json.Formatting.Indented));
                 file.Close();
+
+                if (Crawler.keepRunning == false) System.Environment.Exit(0);
             }
             catch { }
         }

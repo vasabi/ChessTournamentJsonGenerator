@@ -236,7 +236,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerName = WebUtility.HtmlDecode(htmlPlayerInfo
-                                    ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Имя\") + td"][0].InnerText).Trim();
+                                    ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Имя\"):not(tr.CRg1b) + td"][0].InnerText).Trim();
                             }
                             catch
                             {
@@ -251,7 +251,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerNumber = WebUtility.HtmlDecode(htmlPlayerInfo
-                                    ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Стартовое место\") + td"][0].InnerText).Trim();
+                                    ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Стартовое место\"):not(tr.CRg1b) + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerNumbersList.Add(playerNumber);
@@ -259,7 +259,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerNationalRating = WebUtility.HtmlDecode(htmlPlayerInfo
-                                    ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Нац.рейтинг\") + td"][0].InnerText).Trim();
+                                    ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Нац.рейтинг\"):not(tr.CRg1b) + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerNationalRatingsList.Add(playerNationalRating);
@@ -267,7 +267,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerAge = WebUtility.HtmlDecode(htmlPlayerInfo
-                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Год рождения\") + td"][0].InnerText).Trim();
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Год рождения\"):not(tr.CRg1b) + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerAgesList.Add(playerAge);
@@ -275,7 +275,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerFIDEId = WebUtility.HtmlDecode(htmlPlayerInfo //для генерации своего id и проверки уникальности игрока
-                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"код FIDE\") + td"][0].InnerText).Trim();
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"код FIDE\"):not(tr.CRg1b) + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerFIDEIdsList.Add(playerFIDEId);
@@ -283,7 +283,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerFinalPoints = WebUtility.HtmlDecode(htmlPlayerInfo
-                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Очки\") + td"][0].InnerText).Trim();
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n):not(tr.CRg1b) > td:contains(\"Очки\") + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerFinalPointsList.Add(playerFinalPoints);
@@ -291,7 +291,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerRegion = WebUtility.HtmlDecode(htmlPlayerInfo
-                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Федерация\") + td"][0].InnerText).Trim();
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n):not(tr.CRg1b) > td:contains(\"Федерация\") + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerRegionList.Add(playerRegion);
@@ -299,7 +299,7 @@ namespace chess_res_generator
                             try
                             {
                                 playerClub = WebUtility.HtmlDecode(htmlPlayerInfo
-                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n) > td:contains(\"Клуб/Город\") + td"][0].InnerText).Trim();
+                                ["#_ctl0_F7 > div:nth-child(n) > table:nth-child(n) > tbody > tr:nth-child(n):not(tr.CRg1b) > td:contains(\"Клуб/Город\") + td"][0].InnerText).Trim();
                             }
                             catch { }
                             playerClubList.Add(playerClub);

@@ -160,15 +160,17 @@ namespace chess_res_generator
                         #endregion
 
                         string playersListUrl = string.Empty;
+                        CQ htmlPlayerList;
+
                         try
                         {
                             playersListUrl = htmlPageTournamentFull
                                 ["#_ctl0_F7 > div:nth-child(n) > table > tbody > tr:nth-child(n) > td.CR > a:contains(\"Стартовый список\")"]
                                 [0].GetAttribute("href");
+                            htmlPlayerList = GetPage(playersListUrl).Result;
                         }
-                        catch { playersListUrl = tournamentUrlsList[ti]; Console.WriteLine(playersListUrl); }
-
-                        CQ htmlPlayerList = GetPage(playersListUrl).Result;
+                        catch { playersListUrl = tournamentUrlsList[ti]; Console.WriteLine(playersListUrl); htmlPlayerList = htmlPageTournamentFull; }
+                       
                         CQ playerUrlTd;
 
                         try
@@ -183,7 +185,7 @@ namespace chess_res_generator
                         }
 
                         #region GetPlayerInfo
-                        var pi = 0;
+                        var pi = 0;                       
                         List<string> playerIdsList = new List<string>();
                         List<string> playerUrlsList = new List<string>();
                         List<string> playerNamesList = new List<string>();
